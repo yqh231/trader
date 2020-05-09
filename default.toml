@@ -1,0 +1,6 @@
+
+# CoinEx
+[coinex]
+root = "https://api.coinex.com/v1"
+ApiKey = "xxxxx"
+AccessId = "xxxx"
