@@ -13,52 +13,47 @@ import (
 	toml "github.com/pelletier/go-toml"
 )
 
-const (
-	DEPTH = iota + 1
-)
-
-
-const (
-	CARRY = iota + 1
-)
-
 type CoinExClient struct {
 	client *httpClient
 
 	accessId string
-	apiKey string
-	wsRoot string
-	message chan *MessageItems
+	apiKey   string
+	wsRoot   string
+	Message  chan *MessageItems
 }
 
-type MessageItems struct {
-	Type int
-	Strategy int
-	Content []byte
+type MarketOrderDepth struct {
+	Code int `json: "code"`
+	Data OrderData `json: "data"`
+	Message string `json: "message"`
 }
 
+type OrderData struct {
+	Amount string `json: "amount"`
+	AvgPrice string `json: "avg_price"`
+
+}
 
 func NewClient(toml *toml.Tree) *CoinExClient {
 	root := toml.Get("coinex.Root").(string)
 	apiKey := toml.Get("coinex.ApiKey").(string)
 	accessId := toml.Get("coinex.AccessId").(string)
 	wsRoot := toml.Get("coinex.WsRoot").(string)
-	c := newHttpClient(root, time.Second * 1)
+	c := newHttpClient(root, time.Second*1)
 
 	return &CoinExClient{
 		client: c,
 
 		accessId: accessId,
-		apiKey: apiKey,
-		wsRoot: wsRoot,
-		message: make(chan *MessageItems, 10),
+		apiKey:   apiKey,
+		wsRoot:   wsRoot,
+		Message:  make(chan *MessageItems, 10),
 	}
 }
 
-
-func (c *CoinExClient) sign(params map[string]string) string{
+func (c *CoinExClient) sign(params map[string]string) {
 	var (
-		buf []string
+		buf       []string
 		secretStr string
 	)
 
@@ -77,11 +72,14 @@ func (c *CoinExClient) sign(params map[string]string) string{
 
 	secret := md5.Sum([]byte(secretStr))
 
-	return strings.ToUpper(string(secret[:]))
+	c.client.setHeaders(map[string]string{
+		"AUTHORIZATION": strings.ToUpper(string(secret[:])),
+		"Content-Type": "application/json",
+	})
 }
 
 func (c *CoinExClient) addTonce(params map[string]string) {
-	params["tonce"] = fmt.Sprintf("%v", time.Now().UnixNano() / 1e6)
+	params["tonce"] = fmt.Sprintf("%v", time.Now().UnixNano()/1e6)
 }
 
 func (c *CoinExClient) BookDepth(market string) {
@@ -95,7 +93,7 @@ func (c *CoinExClient) BookDepth(market string) {
 	req, _ := json.Marshal(map[string]interface{}{
 		"method": "depth.query",
 		"params": []string{market, "20", "0"},
-		"id": 0,
+		"id":     0,
 	})
 
 	conn.WriteMessage(websocket.TextMessage, req)
@@ -103,44 +101,30 @@ func (c *CoinExClient) BookDepth(market string) {
 	go func() {
 		defer conn.Close()
 		for {
-			_, message ,err := conn.ReadMessage()
+			_, message, err := conn.ReadMessage()
 			if err != nil {
 				continue
 			}
 
-			c.message <- &MessageItems{
-				Type: DEPTH,
+			c.Message <- &MessageItems{
+				Type:    CoinexDepth,
 				Content: message,
 			}
 		}
 	}()
 }
 
-func (c *CoinExClient) routeFunc(m *MessageItems) {
-	switch m.Type {
-	case DEPTH:
-		c.routeDepth(m)
+func (c *CoinExClient) PutMarketOrder(params map[string]string) {
+	var (
+		err error
+		resp *httpResp
+		url = "/v1/order/market"
+	)
+	c.sign(params)	
+	resp, err = c.client.Post(url, params)
+	if err != nil {
+
 	}
-}
 
-func (c *CoinExClient) routeDepth(m *MessageItems) {
-	switch m.Strategy {
-	case CARRY:
-		
-	}
-}
-
-
-func (c *CoinExClient) Consume(nums int) {
-
-	for i := 0; i < nums; i ++{
-		go func() {
-			for {
-				select {
-				case msg := <- c.message:
-					c.routeFunc(msg)
-				}
-			}
-		}()
-	}
+	// resp.unmarshal()
 }
