@@ -1,8 +1,8 @@
 package server
 
 import (
-	"github.com/pelletier/go-toml"
 	"github.com/yqh231/trader/client"
+	toml "github.com/pelletier/go-toml"
 )
 
 
