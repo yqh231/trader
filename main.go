@@ -12,7 +12,7 @@ import (
 
 
 func main() {
-	config := initConfig()
+	// config := initConfig()
 	
 	waitForSignal()
 }
