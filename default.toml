@@ -1,6 +1,7 @@
 
 # CoinEx
 [coinex]
-root = "https://api.coinex.com/v1"
+Root = "https://api.coinex.com/v1"
 ApiKey = "xxxxx"
 AccessId = "xxxx"
+WsRoot = "socket.coinex.com"
