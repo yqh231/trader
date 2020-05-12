@@ -6,15 +6,25 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/yqh231/server"
+	"github.com/yqh231/trader/logger"
+	"github.com/yqh231/trader/server"
 	toml "github.com/pelletier/go-toml"
 )
 
 
 func main() {
-	// config := initConfig()
+	initLogger()
+	toml := initConfig()
 	
+	srv := server.NewServer(toml)
+
+	srv.Consume(toml.Get("system.worker").(int))
+
 	waitForSignal()
+}
+
+func initLogger() {
+	_  = logger.GetLogger() // init
 }
 
 

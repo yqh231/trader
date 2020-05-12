@@ -1,4 +1,7 @@
 
+[system]
+worker = 30
+
 # CoinEx
 [coinex]
 Root = "https://api.coinex.com/v1"
