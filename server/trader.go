@@ -32,11 +32,4 @@ func (t *TraderServer) Consume(nums int) {
 	}
 }
 
-func (t *TraderServer) consumeCoinex(m *client.MessageItems) {
-	switch m.Type {
-	case client.CoinexDepth:
-		
-	}
-}
-
 

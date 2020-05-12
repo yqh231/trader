@@ -9,24 +9,23 @@ import (
 	"time"
 )
 
-type httpClient struct {	
+type httpClient struct {
 	sync.RWMutex
 
-	client *http.Client
+	client  *http.Client
 	headers map[string]string
-	root string
+	root    string
 }
 
 type httpResp struct {
 	resp *http.Response
 }
 
-
-func newHttpClient(root string, timeOut time.Duration) *httpClient{
+func newHttpClient(root string, timeOut time.Duration) *httpClient {
 	return &httpClient{
-		client: &http.Client{Timeout: timeOut * time.Second},
+		client:  &http.Client{Timeout: timeOut * time.Second},
 		headers: make(map[string]string),
-		root: root,
+		root:    root,
 	}
 }
 
@@ -39,15 +38,14 @@ func (client *httpClient) setHeaders(headers map[string]string) {
 	}
 }
 
-
 func (client *httpClient) Get(url string, parameters map[string]string) (*httpResp, error) {
 	var (
-		req *http.Request
+		req  *http.Request
 		resp *http.Response
-		err error
+		err  error
 	)
 
-	req, err = http.NewRequest("GET", client.root + url, nil)
+	req, err = http.NewRequest("GET", client.root+url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -70,9 +68,9 @@ func (client *httpClient) Get(url string, parameters map[string]string) (*httpRe
 
 func (client *httpClient) Post(url string, parameters map[string]string) (*httpResp, error) {
 	var (
-		req *http.Request
+		req  *http.Request
 		resp *http.Response
-		err error
+		err  error
 		body []byte
 	)
 
@@ -81,7 +79,7 @@ func (client *httpClient) Post(url string, parameters map[string]string) (*httpR
 		return nil, err
 	}
 
-	req, err = http.NewRequest("POST", client.root + url, bytes.NewBuffer(body))
+	req, err = http.NewRequest("POST", client.root+url, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +92,7 @@ func (client *httpClient) Post(url string, parameters map[string]string) (*httpR
 	return &httpResp{resp: resp}, nil
 }
 
-func (r *httpResp) toString() (string, error){
+func (r *httpResp) toString() (string, error) {
 	response, err := ioutil.ReadAll(r.resp.Body)
 	if err != nil {
 		return "", err
@@ -102,7 +100,7 @@ func (r *httpResp) toString() (string, error){
 	return string(response), nil
 }
 
-func (r *httpResp) unmarshal(v interface{}) error{
+func (r *httpResp) unmarshal(v interface{}) error {
 	response, err := ioutil.ReadAll(r.resp.Body)
 	if err != nil {
 		return err

@@ -1,23 +1,22 @@
 package logger
 
 import (
-	"json"
+	"encoding/json"
 	"sync"
 
-	"go.uber.org/zap")
+	"go.uber.org/zap"
+)
 
 type Logger struct {
-	zap *zap.SugaredLogger
+	Zap *zap.SugaredLogger
 }
 
 var (
 	ZapLogger *Logger
-	once sync.Once
+	once      sync.Once
 )
 
-
-
-func GetLogger() *Logger{
+func GetLogger() *Logger {
 
 	rawJSON := []byte(`{
 	  "level": "debug",
@@ -36,15 +35,14 @@ func GetLogger() *Logger{
 		var cfg zap.Config
 
 		if err := json.Unmarshal(rawJSON, &cfg); err != nil {
-    		panic(err)
+			panic(err)
 		}
-		logger, err := cfg.Build() 
+		logger, err := cfg.Build()
 		if err != nil {
 			panic("Init logger failed")
 		}
-		ZapLogger = &Logger{zap: logger.Sugar()}
+		ZapLogger = &Logger{Zap: logger.Sugar()}
 
 	})
-
-	return ZapLogger 
+	return ZapLogger
 }

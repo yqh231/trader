@@ -6,16 +6,15 @@ import (
 	"os/signal"
 	"syscall"
 
+	toml "github.com/pelletier/go-toml"
 	"github.com/yqh231/trader/logger"
 	"github.com/yqh231/trader/server"
-	toml "github.com/pelletier/go-toml"
 )
-
 
 func main() {
 	initLogger()
 	toml := initConfig()
-	
+
 	srv := server.NewServer(toml)
 
 	srv.Consume(toml.Get("system.worker").(int))
@@ -24,9 +23,8 @@ func main() {
 }
 
 func initLogger() {
-	_  = logger.GetLogger() // init
+	_ = logger.GetLogger() // init
 }
-
 
 func initConfig() *toml.Tree {
 	content, err := ioutil.ReadFile("default.toml")
@@ -41,12 +39,8 @@ func initConfig() *toml.Tree {
 	return config
 }
 
-
 func waitForSignal() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	<-c
 }
-
-
-

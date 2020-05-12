@@ -8,9 +8,9 @@ import (
 )
 
 type DepthResponse struct {
-	Code int
+	Code    int
 	Message string
-	Data *DepthData
+	Data    *DepthData
 }
 
 type DepthData struct {
@@ -19,13 +19,14 @@ type DepthData struct {
 	Asks [][]string
 	Bids [][]string
 }
+
 func TestHttpGet(t *testing.T) {
 	var (
 		root = "https://api.coinex.com"
-		url = "/v1/market/depth"
+		url  = "/v1/market/depth"
 	)
 
-	c := newHttpClient(root, 2 * time.Second)
+	c := newHttpClient(root, 2*time.Second)
 
 	c.setHeaders(map[string]string{
 		"Content-Type": "application/json;charset=utf-8",
@@ -33,8 +34,8 @@ func TestHttpGet(t *testing.T) {
 
 	resp, _ := c.Get(url, map[string]string{
 		"market": "bchbtc",
-		"limit": "5",
-		"merge": "0",
+		"limit":  "5",
+		"merge":  "0",
 	})
 
 	depth := new(DepthResponse)

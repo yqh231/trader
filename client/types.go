@@ -1,10 +1,9 @@
 package client
 
 type MessageItems struct {
-	Type int
+	Type    int
 	Content []byte
 }
-
 
 const (
 	CoinexDepth = iota + 1
