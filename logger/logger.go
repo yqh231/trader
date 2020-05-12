@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"sync"
 
 	toml "github.com/pelletier/go-toml"
@@ -17,7 +18,7 @@ var (
 	once      sync.Once
 )
 
-func GetLogger(toml *toml.Tree) *Logger {
+func NewLogger(toml *toml.Tree) *Logger {
 
 	var (
 		logLevel  = toml.Get("logger.level").(string)
@@ -42,7 +43,7 @@ func GetLogger(toml *toml.Tree) *Logger {
 			zapLogLevel = zapcore.FatalLevel
 		}
 
-		l, err := &zap.Config{
+		l, err := zap.Config{
 			Development:      false,
 			Encoding:         "console",
 			OutputPaths:      []string{"stdout", logPath + logPrefix},
@@ -59,6 +60,18 @@ func GetLogger(toml *toml.Tree) *Logger {
 			Level: zap.NewAtomicLevelAt(zapLogLevel),
 		}.Build(zap.AddCallerSkip(1))
 
+		if err != nil {
+			panic(fmt.Sprintf("Init logger fail, %s", err.Error()))
+		}
+
+		ZapLogger = &Logger{
+			Zap: l.Sugar(),
+		}
+
 	})
+	return ZapLogger
+}
+
+func GetLogger() *Logger {
 	return ZapLogger
 }

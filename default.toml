@@ -2,6 +2,11 @@
 [system]
 worker = 30
 
+[logger]
+level = "debug"
+path = "/tmp/trader"
+prefix = "trader_server"
+
 # CoinEx
 [coinex]
 Root = "https://api.coinex.com/v1"

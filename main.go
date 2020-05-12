@@ -12,18 +12,17 @@ import (
 )
 
 func main() {
-	initLogger()
 	toml := initConfig()
 
+	initLogger(toml)
 	srv := server.NewServer(toml)
-
 	srv.Consume(toml.Get("system.worker").(int))
 
 	waitForSignal()
 }
 
-func initLogger() {
-	_ = logger.GetLogger() // init
+func initLogger(toml *toml.Tree) {
+	_ = logger.NewLogger(toml) // init
 }
 
 func initConfig() *toml.Tree {
