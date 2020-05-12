@@ -39,9 +39,8 @@ func TestHttpGet(t *testing.T) {
 	})
 
 	depth := new(DepthResponse)
-	fmt.Println(depth.Data.Asks)
 
 	resp.unmarshal(depth)
-
 	fmt.Println(depth.Data.Asks)
+
 }

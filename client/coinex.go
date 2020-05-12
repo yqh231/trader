@@ -106,8 +106,8 @@ func (c *CoinExClient) BookDepth(market string) error{
 	}
 
 	req, _ := json.Marshal(map[string]interface{}{
-		"method": "depth.query",
-		"params": []string{market, "20", "0"},
+		"method": "depth.subscribe",
+		"params": []interface{}{market, 5, "0"},
 		"id":     0,
 	})
 
@@ -121,7 +121,6 @@ func (c *CoinExClient) BookDepth(market string) error{
 				l.Zap.Warnw(err.Error())
 				continue
 			}
-
 			c.Message <- &MessageItems{
 				Type:    CoinexDepth,
 				Content: message,

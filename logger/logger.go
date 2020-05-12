@@ -1,10 +1,11 @@
 package logger
 
 import (
-	"encoding/json"
 	"sync"
 
+	toml "github.com/pelletier/go-toml"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type Logger struct {
@@ -16,32 +17,47 @@ var (
 	once      sync.Once
 )
 
-func GetLogger() *Logger {
+func GetLogger(toml *toml.Tree) *Logger {
 
-	rawJSON := []byte(`{
-	  "level": "debug",
-	  "encoding": "json",
-	  "outputPaths": [/tmp/trader"],
-	  "errorOutputPaths": ["stderr"],
-	  "initialFields": {"foo": "bar"},
-	  "encoderConfig": {
-	    "messageKey": "message",
-	    "levelKey": "level",
-	    "levelEncoder": "lowercase"
-	  }
-	}`)
+	var (
+		logLevel  = toml.Get("logger.level").(string)
+		logPath   = toml.Get("logger.path").(string)
+		logPrefix = toml.Get("logger.prefix").(string)
+	)
 
 	once.Do(func() {
-		var cfg zap.Config
+		var zapLogLevel zapcore.Level
+		switch logLevel {
+		case "debug":
+			zapLogLevel = zapcore.DebugLevel
+		case "info":
+			zapLogLevel = zapcore.InfoLevel
+		case "warn":
+			zapLogLevel = zapcore.WarnLevel
+		case "error":
+			zapLogLevel = zapcore.ErrorLevel
+		case "panic":
+			zapLogLevel = zapcore.PanicLevel
+		case "fatal":
+			zapLogLevel = zapcore.FatalLevel
+		}
 
-		if err := json.Unmarshal(rawJSON, &cfg); err != nil {
-			panic(err)
-		}
-		logger, err := cfg.Build()
-		if err != nil {
-			panic("Init logger failed")
-		}
-		ZapLogger = &Logger{Zap: logger.Sugar()}
+		l, err := &zap.Config{
+			Development:      false,
+			Encoding:         "console",
+			OutputPaths:      []string{"stdout", logPath + logPrefix},
+			ErrorOutputPaths: []string{"stderr"},
+			EncoderConfig: zapcore.EncoderConfig{
+				MessageKey:   "Message",
+				TimeKey:      "Time",
+				EncodeTime:   zapcore.RFC3339TimeEncoder,
+				LevelKey:     "Level",
+				EncodeLevel:  zapcore.CapitalLevelEncoder,
+				CallerKey:    "caller",
+				EncodeCaller: zapcore.ShortCallerEncoder,
+			},
+			Level: zap.NewAtomicLevelAt(zapLogLevel),
+		}.Build(zap.AddCallerSkip(1))
 
 	})
 	return ZapLogger
