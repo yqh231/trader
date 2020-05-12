@@ -66,7 +66,7 @@ func (client *httpClient) Get(url string, parameters map[string]string) (*httpRe
 	return &httpResp{resp: resp}, nil
 }
 
-func (client *httpClient) Post(url string, parameters map[string]string) (*httpResp, error) {
+func (client *httpClient) Post(url string, parameters map[string]interface{}) (*httpResp, error) {
 	var (
 		req  *http.Request
 		resp *http.Response
