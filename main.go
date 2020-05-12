@@ -17,7 +17,6 @@ func main() {
 	initLogger(toml)
 	srv := server.NewServer(toml)
 	srv.Consume(toml.Get("system.worker").(int))
-
 	waitForSignal()
 }
 

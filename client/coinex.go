@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yqh231/trader/logger"
 	"github.com/gorilla/websocket"
 	toml "github.com/pelletier/go-toml"
+	"github.com/yqh231/trader/logger"
 )
 
 type CoinExClient struct {
@@ -30,22 +30,22 @@ type MarketOrderDepth struct {
 }
 
 type OrderData struct {
-	Amount   string `json:"amount"`
-	AvgPrice string `json:"avg_price"`
-	CreateTime int `json:"create_time"`
-	DealAmount string `json:"deal_amount"`
-	DealMoney string `json:"deal_money"`
-	Id int `json:"id"`
-	Left string `json:"left"`
+	Amount       string `json:"amount"`
+	AvgPrice     string `json:"avg_price"`
+	CreateTime   int    `json:"create_time"`
+	DealAmount   string `json:"deal_amount"`
+	DealMoney    string `json:"deal_money"`
+	Id           int    `json:"id"`
+	Left         string `json:"left"`
 	MakerFeeRate string `json:"string"`
-	Market string `json:"market"`
-	OrderType string `json:"order_type"`
-	Price string `json:"price"`
-	SourceId string `json:"source_id"`
-	Status string `json:"status"`
+	Market       string `json:"market"`
+	OrderType    string `json:"order_type"`
+	Price        string `json:"price"`
+	SourceId     string `json:"source_id"`
+	Status       string `json:"status"`
 	TakerFeeRate string `json:"taker_fee_rate"`
-	Type string `json:"type"`
-	ClientId string `json:"client_id"`
+	Type         string `json:"type"`
+	ClientId     string `json:"client_id"`
 }
 
 func NewClient(toml *toml.Tree) *CoinExClient {
@@ -65,7 +65,7 @@ func NewClient(toml *toml.Tree) *CoinExClient {
 	}
 }
 
-func (c *CoinExClient) sign(params map[string]string) {
+func (c *CoinExClient) sign(params map[string]interface{}) {
 	var (
 		buf       []string
 		secretStr string
@@ -80,7 +80,7 @@ func (c *CoinExClient) sign(params map[string]string) {
 
 	secretStr += fmt.Sprintf("access_id=%s", c.accessId)
 	for _, key := range buf {
-		secretStr += fmt.Sprintf("&%s=%s", key, params[key])
+		secretStr += fmt.Sprintf("&%s=%v", key, params[key])
 	}
 	secretStr += fmt.Sprintf("&secret_key=%s", c.apiKey)
 
@@ -92,11 +92,11 @@ func (c *CoinExClient) sign(params map[string]string) {
 	})
 }
 
-func (c *CoinExClient) addTonce(params map[string]string) {
+func (c *CoinExClient) addTonce(params map[string]interface{}) {
 	params["tonce"] = fmt.Sprintf("%v", time.Now().UnixNano()/1e6)
 }
 
-func (c *CoinExClient) BookDepth(market string) error{
+func (c *CoinExClient) BookDepth(market string) error {
 	u := url.URL{Scheme: "wss", Host: c.wsRoot, Path: ""}
 	l := logger.GetLogger()
 	conn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
@@ -131,12 +131,12 @@ func (c *CoinExClient) BookDepth(market string) error{
 	return nil
 }
 
-func (c *CoinExClient) PutMarketOrder(params map[string]string) (*MarketOrderDepth, error){
+func (c *CoinExClient) PutMarketOrder(params map[string]interface{}) (*MarketOrderDepth, error) {
 	var (
 		err  error
 		resp *httpResp
 		url  = "/v1/order/market"
-		l = logger.GetLogger()
+		l    = logger.GetLogger()
 	)
 	c.sign(params)
 	resp, err = c.client.Post(url, params)
